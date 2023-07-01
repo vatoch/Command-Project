@@ -30,7 +30,7 @@ public class Balance {
     @Column
     private LocalDateTime lastUpdated;
 
-    @OneToOne(mappedBy = "balance",fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "balance",fetch = FetchType.LAZY)
     private User user;
 
 }

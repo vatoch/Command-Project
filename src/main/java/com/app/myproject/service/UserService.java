@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -84,27 +87,29 @@ public class UserService {
 
     @Transactional
     public void acceptFriendRequest(String sender,String receiver) {
-        Optional<UserFriend> userFriend = userFriendRepository.finDbyUserNames(sender,receiver);
-        if(userFriend.isEmpty()) {
-            throw new UserNotFoundException();
-        }
-        if(userFriend.get().getStatus()!=FriendshipStatus.PENDING) {
+        Optional<UserFriend> userFriend = userFriendRepository.finDbyUserNames(receiver,sender);
+        UserFriend userFriend1 = userFriend.orElseThrow(UserNotFoundException::new);
+
+
+        if(userFriend1.getStatus()!=FriendshipStatus.PENDING) {
             throw new UnsupportedOperationException("Can't accept friend request");
         }
-        userFriend.get().setStatus(FriendshipStatus.FRIENDS);
+
+
+        userFriend1.setStatus(FriendshipStatus.FRIENDS);
+        userFriend1.setDate(LocalDateTime.now());
 
     }
 
     @Transactional
     public void rejectFriendRequest(String sender,String receiver) {
-        Optional<UserFriend> userFriend = userFriendRepository.finDbyUserNames(sender,receiver);
-        if(userFriend.isEmpty()) {
-            throw new UserNotFoundException();
+        Optional<UserFriend> userFriend = userFriendRepository.finDbyUserNames(receiver,sender);
+        UserFriend userFriend1 = userFriend.orElseThrow(UserNotFoundException::new);
+        if(userFriend1.getStatus()!=FriendshipStatus.PENDING) {
+            throw new UnsupportedOperationException("Can't reject friend request");
         }
-        if(userFriend.get().getStatus()!=FriendshipStatus.PENDING) {
-            throw new UnsupportedOperationException("Can't reject friendship ");
-        }
-        userFriend.get().setStatus(FriendshipStatus.DELETED);
+        userFriend1.setStatus(FriendshipStatus.DELETED);
+        userFriend1.setDate(LocalDateTime.now());
     }
 
     @Transactional
@@ -129,23 +134,21 @@ public class UserService {
 
 
     }
+    @Transactional
+    public List<User> getFriends(String username) {
+        Optional<List<UserFriend>> userFriends = userFriendRepository.getFriends(username);
+        List<UserFriend> userFriends1 = userFriends.orElseGet(List::of);
+        List<User> users = new ArrayList<>();
+        userFriends1.forEach(x-> {
+            if(x.getSender().getUsername().equals(username)) {
+                users.add(x.getReceiver());
+            } else {
+                users.add(x.getSender());
+            }
+        });
+        return users;
 
-//    @Transactional
-//    public List<User> getFriends(String username) {
-//        Optional<List<UserFriend>> userFriendsOptional = repo.getFriends(username);
-//        List<UserFriend> userFriends = userFriendsOptional.orElseThrow(UserNotFoundException::new);
-//        List<User> friends = new ArrayList<>();
-//        userFriends.forEach(x-> {
-//            if(x.getReceiver().getUsername().equals(username)) {
-//                friends.add(x.getSender());
-//            } else {
-//                friends.add(x.getReceiver());
-//            }
-//        });
-//
-//        return friends;
-//
-//    }
+    }
 
     public String getAudioUrl(String accessToken, byte[] fileData) throws IOException {
         String url = "https://api.assemblyai.com/v2/upload";
