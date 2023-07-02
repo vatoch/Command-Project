@@ -18,7 +18,8 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-    Optional<User> findByUsername(String username);
+    @Query("select u from User u where u.username=:username")
+    Optional<User> findByUsername(@Param(value = "username") String username);
 
     @Query("select u  from   User u where u.id=:id")
     User myQuery(@Param("id") UUID id);
@@ -26,11 +27,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
 
     Optional<User> findByEmail(String email);
-
-
-
-
-
 
 
 

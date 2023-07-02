@@ -28,19 +28,19 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/sendrequest/{receiver}")
+    @PostMapping("/friendrequest/send/{receiver}")
     public ResponseEntity<Void> sendFriendRequest(@RequestHeader(name = "username") String username,@PathVariable String receiver) {
         service.sendFriendRequest(username,receiver);
         return ResponseEntity.ok().build();
     }
 
 
-    @PostMapping("/request/accept/{receiver}")
+    @PostMapping("/friendrequest/accept/{receiver}")
     public ResponseEntity<Void> acceptFriendRequest(@RequestHeader(name = "username") String username,@PathVariable String receiver) {
         service.acceptFriendRequest(username,receiver);
         return ResponseEntity.ok().build();
     }
-    @PostMapping("/request/reject/{receiver}")
+    @PostMapping("/friendrequest/reject/{receiver}")
     public ResponseEntity<Void> rejectFriendRequest(@RequestHeader(name = "username") String username,@PathVariable String receiver) {
         service.rejectFriendRequest(username,receiver);
         return ResponseEntity.ok().build();
@@ -52,31 +52,7 @@ public class UserController {
         service.deleteFriend(username,receiver);
         return ResponseEntity.ok().build();
     }
-//
-//    @PostMapping("/send")
-//    public ResponseEntity<String> sendRequest(@RequestBody byte[] data) throws IOException , InterruptedException {
-//
-//        String audio_url = service.getAudioUrl("6fc8664645534ab4974b053cf94e9808",data);
-//
-//        String id = service.getId("6fc8664645534ab4974b053cf94e9808",audio_url);
-//        System.out.println(id);
-//
-//
-//       return ResponseEntity.ok(service.convertAudioToText("6fc8664645534ab4974b053cf94e9808",id));
-//    }
-//
-//    @PostMapping("/my")
-//    public ResponseEntity<String> my(@RequestBody byte[] data) throws IOException, InterruptedException {
-//        return ResponseEntity.ok(service.getAudioUrl("6fc8664645534ab4974b053cf94e9808",data));
-//    }
-//
-//    @GetMapping("/tes/{vatsap}")
-//    public ResponseEntity<Void> tes(@PathVariable(name = "vatsap") String name) {
-//        return ResponseEntity.ok().build();
-//    }
-//
-//
-//
+
 
 
 }

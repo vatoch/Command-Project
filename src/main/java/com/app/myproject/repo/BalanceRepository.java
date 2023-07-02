@@ -16,6 +16,5 @@ import java.util.UUID;
 public interface BalanceRepository extends JpaRepository<Balance, UUID> {
 
     @Query("select b from Balance b where b.user.username=:username")
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Balance> getUserBalanceByUserName(@Param("username") String username);
 }

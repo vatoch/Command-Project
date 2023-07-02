@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface UserFriendRepository extends JpaRepository<UserFriend,Long> {
 
 
-    @Query("SELECT u FROM UserFriend u WHERE u.sender=:sender and u.receiver=:receiver")
+    @Query("SELECT u FROM UserFriend u WHERE u.sender.username=:sender and u.receiver.username=:receiver")
     @Lock(LockModeType.OPTIMISTIC)
     Optional<UserFriend> finDbyUserNames(@Param("sender") String sender, @Param("receiver") String receiver);
 

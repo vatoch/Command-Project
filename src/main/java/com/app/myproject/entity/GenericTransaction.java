@@ -1,6 +1,7 @@
 package com.app.myproject.entity;
 
 
+import com.app.myproject.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,10 @@ public class GenericTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "transaction_type")
+    @Enumerated(EnumType.STRING)
+    private TransactionType transactionType;
 
 
 }

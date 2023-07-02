@@ -1,7 +1,6 @@
 package com.app.myproject;
 
 
-import com.app.myproject.config.MyConf;
 import com.app.myproject.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

@@ -1,5 +1,9 @@
 package com.app.myproject.service;
 
+import com.app.myproject.entity.User;
+import com.app.myproject.entity.UserFriend;
+import com.app.myproject.exceptions.NotFriendsException;
+import com.app.myproject.exceptions.UserNotFoundException;
 import com.app.myproject.repo.UserFriendRepository;
 import com.app.myproject.repo.UserRepository;
 import jakarta.mail.*;
@@ -9,7 +13,10 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Properties;
 
 @Component
@@ -21,8 +28,23 @@ public class EmailService {
 
 
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendEmail(String username,String receiverUsername,String text,String subject) throws MessagingException {
+        Optional<User> user1 = userRepository.findByUsername(username);
+        Optional<User> user2 = userRepository.findByUsername(receiverUsername);
+        User sender = user1.orElseThrow(UserNotFoundException::new);
+        User receiver = user2.orElseThrow(UserNotFoundException::new);
+        Optional<UserFriend> userFriend1 = userFriendRepository.finDbyUserNames(username,receiverUsername);
+        Optional<UserFriend> userFriend2 = userFriendRepository.finDbyUserNames(receiverUsername,username);
+        if(userFriend1.isEmpty()&&userFriend2.isEmpty()) {
+            throw new NotFriendsException();
 
-    public void sendEmail(String username,String password,String receiverEmail,String text,String subject) throws MessagingException {
+        }
+        try {
+            Thread.sleep(10000);
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         Properties prop = new Properties();
         prop.put("mail.smtp.auth", true);
@@ -39,7 +61,7 @@ public class EmailService {
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress("vatochitaia6@gmail.com"));
         message.setRecipients(
-                Message.RecipientType.TO, InternetAddress.parse(receiverEmail));
+                Message.RecipientType.TO, InternetAddress.parse(receiver.getEmail()));
         message.setSubject(subject);
 
 
