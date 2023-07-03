@@ -1,21 +1,16 @@
 package com.app.myproject.service;
 
 
-import com.app.myproject.entity.Balance;
-import com.app.myproject.entity.GenericTransaction;
-import com.app.myproject.entity.UserTransaction;
+import com.app.myproject.entity.*;
 import com.app.myproject.enums.TransactionStatus;
 import com.app.myproject.enums.TransactionType;
-import com.app.myproject.exceptions.InsufficientBalanceException;
-import com.app.myproject.exceptions.NotFriendsException;
-import com.app.myproject.exceptions.UserNotFoundException;
+import com.app.myproject.exceptions.*;
 import com.app.myproject.repo.BalanceRepository;
+import com.app.myproject.repo.CommandRepository;
+import com.app.myproject.repo.UserCommandTransactionRepository;
 import com.app.myproject.repo.UserTransactionRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +26,8 @@ public class TransactionService {
     private final BalanceService balanceService;
     private final BalanceRepository balanceRepository;
     private final UserTransactionRepository userTransactionRepository;
+    private final CommandRepository commandRepository;
+    private final UserCommandTransactionRepository userCommandTransactionRepository;
 
 
 
@@ -50,12 +47,36 @@ public class TransactionService {
         userTransaction.setTransaction(genericTransaction);
         try {
             userTransaction.setStatus(TransactionStatus.SUCCESSFUL);
-            balanceService.transferMoney(sender,receiver,amount);
+            balanceService.transferMoney(sender,receiver,balanceSender,balanceReceiver,amount);
         }catch (NotFriendsException | InsufficientBalanceException e) {
             userTransaction.setStatus(TransactionStatus.DECLINED);
         }
         userTransactionRepository.save(userTransaction);
         System.out.println(TransactionStatus.DECLINED.ordinal());
+    }
+
+    @Transactional
+    public void buyCommand(String username,String command) {
+        Optional<Balance> balanceOptional = balanceRepository.getUserBalanceByUserName(username);
+        Optional<Command> commandOptional = commandRepository.findByName(command);
+        Balance balance = balanceOptional.orElseThrow(UserNotFoundException::new);
+        Command command1 = commandOptional.orElseThrow(CommandNotFoundException::new);
+        UserCommandTransaction transaction = new UserCommandTransaction();
+        transaction.setCommand(command1);
+        transaction.setBuyer(balance);
+        transaction.setCreationTime(LocalDateTime.now());
+        GenericTransaction genericTransaction = new GenericTransaction();
+        genericTransaction.setTransactionType(TransactionType.USER_COMMAND_TRANSACTION);
+        transaction.setTransaction(genericTransaction);
+        transaction.setAmount(command1.getPrice());
+        try {
+            transaction.setStatus(TransactionStatus.SUCCESSFUL);
+            balanceService.buyCommand(username,command);
+
+        }catch(InsufficientBalanceException | CommandAlreadyBoughtException e) {
+            transaction.setStatus(TransactionStatus.DECLINED);
+        }
+        userCommandTransactionRepository.save(transaction);
     }
 
 

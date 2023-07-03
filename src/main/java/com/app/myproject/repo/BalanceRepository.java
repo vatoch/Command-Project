@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,5 +15,6 @@ import java.util.UUID;
 public interface BalanceRepository extends JpaRepository<Balance, UUID> {
 
     @Query("select b from Balance b where b.user.username=:username")
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Balance> getUserBalanceByUserName(@Param("username") String username);
 }
