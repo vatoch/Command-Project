@@ -3,7 +3,6 @@ package com.app.myproject.service;
 import com.app.myproject.entity.User;
 import com.app.myproject.exceptions.UserNotFoundException;
 import com.app.myproject.repo.UserRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +14,6 @@ import java.util.Optional;
 public class MessageService{
 
     private final UserRepository userRepository;
-
 
     @Transactional
     public void sendMessage(String sender,String receiver,String message) {

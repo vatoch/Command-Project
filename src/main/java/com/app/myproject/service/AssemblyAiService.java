@@ -55,14 +55,12 @@ public class AssemblyAiService {
         JsonNode jsonNode = mapper.readTree(responseBody);
 
         // Extract the value of the "audio_url" field
-        String audioUrl = jsonNode.get("upload_url").asText();
 
-        return audioUrl;
+        return jsonNode.get("upload_url").asText();
     }
 
     public String getId(String accessToken,String audioUrl) throws IOException {
         HttpHeaders headers = new HttpHeaders();
-        String result;
         headers.setBearerAuth(accessToken);
 
         String requestBody = "{\"audio_url\":\"" + audioUrl + "\"}";
@@ -73,8 +71,8 @@ public class AssemblyAiService {
     private String extractIdFromResponseBody(String responseBody)throws IOException {
 
         JsonNode jsonNode = mapper.readTree(responseBody);
-        String id = jsonNode.get("id").asText();
-        return id;
+
+        return jsonNode.get("id").asText();
     }
     public String convertAudioToText(String accessToken,String id) throws IOException {
         String url = transformUrl+id;
@@ -98,13 +96,11 @@ public class AssemblyAiService {
     }
     private String extractTextFromResponseBody(String responseBody)throws IOException {
         JsonNode jsonNode = mapper.readTree(responseBody);
-        String id = jsonNode.get("text").asText();
-        return id;
+        return jsonNode.get("text").asText();
     }
     private String extractStatusFromResponseBody(String responseBody) throws IOException {
         JsonNode jsonNode = mapper.readTree(responseBody);
-        String id = jsonNode.get("status").asText();
-        return id;
+        return jsonNode.get("status").asText();
     }
 
 
