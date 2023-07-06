@@ -54,8 +54,6 @@ public class AssemblyAiService {
 
         JsonNode jsonNode = mapper.readTree(responseBody);
 
-        // Extract the value of the "audio_url" field
-
         return jsonNode.get("upload_url").asText();
     }
 
