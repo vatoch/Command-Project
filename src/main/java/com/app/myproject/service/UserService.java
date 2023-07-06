@@ -7,28 +7,17 @@ import com.app.myproject.enums.FriendshipStatus;
 import com.app.myproject.exceptions.UserNotFoundException;
 import com.app.myproject.repo.UserFriendRepository;
 import com.app.myproject.repo.UserRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
@@ -37,9 +26,7 @@ public class UserService {
 
     private final UserRepository repo;
     private final UserFriendRepository userFriendRepository;
-    private final static Logger logg = LoggerFactory.getLogger("mylog");
-    private final WebClient webClient;
-    private final ObjectMapper mapper;
+
 
     @Transactional
     public void registerUser(User user) {
@@ -86,7 +73,7 @@ public class UserService {
 
     @Transactional
     public void acceptFriendRequest(String sender,String receiver) {
-        Optional<UserFriend> userFriend = userFriendRepository.finDbyUserNames(receiver,sender);
+        Optional<UserFriend> userFriend = userFriendRepository.finDbyUserNames(sender,receiver);
         UserFriend userFriend1 = userFriend.orElseThrow(UserNotFoundException::new);
 
 
@@ -149,123 +136,8 @@ public class UserService {
 
     }
 
-    public String getAudioUrl(String accessToken, byte[] fileData) throws IOException {
-        String url = "https://api.assemblyai.com/v2/upload";
-        AtomicReference<String> result = new AtomicReference<>();
-        // Set request headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.setBearerAuth(accessToken);
-        headers.set(HttpHeaders.TRANSFER_ENCODING, "chunked");
-
-        // Create the multipart request body
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", fileData);
 
 
-        webClient.post()
-                .uri(url)
-                .headers(h -> h.addAll(headers))
-                .body(BodyInserters.fromMultipartData(body))
-                .retrieve()
-                .bodyToMono(String.class)
-                .subscribe(responseBody-> {
-                    try {
-                        result.set(extractAudioUrlFromResponseBody(responseBody));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    System.out.println(result.get());
-                    System.out.println(responseBody);
-                });
-
-        while(result.get()==null) {
-
-        }
-
-        return result.get();
-
-    }
-    public String getId(String accessToken,String audioUrl) {
-        String url = "https://api.assemblyai.com/v2/transcript";
-        HttpHeaders headers = new HttpHeaders();
-         AtomicReference<String> result  = new AtomicReference<>();
-        headers.setBearerAuth(accessToken);
-        String requestBody = "{\"audio_url\":\"" + audioUrl + "\"}";
-
-        webClient.post().uri(url).headers(h->h.addAll(headers)).bodyValue(requestBody).retrieve().bodyToMono(String.class)
-                .subscribe(responseBody-> {
-                    String s = null;
-                    try {
-                        result.set(extractIdFromResponseBody(responseBody));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                });
-        while(result.get()==null) {
-
-        }
-        return result.get();
-    }
-
-    public String convertAudioToText(String accessToken,String id) throws IOException {
-        String url = "https://api.assemblyai.com/v2/transcript/"+id;
-        AtomicReference<String> result = new AtomicReference<>();
-
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-
-        while(true) {
-            String responseBody = webClient.get()
-                    .uri(url).headers(h -> h.addAll(headers))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-            if(extractStatusFromResponseBody(responseBody).equals("completed")) {
-                result.set(extractTextFromResponseBody(responseBody));
-                break;
-            }
-        }
-
-        while(result.get()==null) {
-
-        }
-        return result.get();
-    }
-    private String extractTextFromResponseBody(String responseBody)throws IOException {
-        JsonNode jsonNode = mapper.readTree(responseBody);
-        String id = jsonNode.get("text").asText();
-        return id;
-    }
-    private String extractStatusFromResponseBody(String responseBody) throws IOException {
-        JsonNode jsonNode = mapper.readTree(responseBody);
-        String id = jsonNode.get("status").asText();
-        return id;
-    }
-    private String extractIdFromResponseBody(String responseBody)throws IOException {
-
-        JsonNode jsonNode = mapper.readTree(responseBody);
-        String id = jsonNode.get("id").asText();
-        return id;
-    }
-    private String extractAudioUrlFromResponseBody(String responseBody)throws IOException {
-
-        JsonNode jsonNode = mapper.readTree(responseBody);
-
-        // Extract the value of the "audio_url" field
-        String audioUrl = jsonNode.get("upload_url").asText();
-
-        return audioUrl;
-    }
-
-    private void h1(String a) {
-
-    }
-    private void h1(Integer a) {
-
-    }
 
 }
 

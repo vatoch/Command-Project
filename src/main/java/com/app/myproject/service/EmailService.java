@@ -13,8 +13,8 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.Optional;
 import java.util.Properties;
@@ -27,9 +27,8 @@ public class EmailService {
     private final UserRepository userRepository;
 
 
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void sendEmail(String username,String receiverUsername,String text,String subject) throws MessagingException {
+    @Transactional
+    public void sendEmail(String username,String receiverUsername,String text) throws MessagingException {
         Optional<User> user1 = userRepository.findByUsername(username);
         Optional<User> user2 = userRepository.findByUsername(receiverUsername);
         User sender = user1.orElseThrow(UserNotFoundException::new);
@@ -40,11 +39,7 @@ public class EmailService {
             throw new NotFriendsException();
 
         }
-        try {
-            Thread.sleep(10000);
-        }catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
 
         Properties prop = new Properties();
         prop.put("mail.smtp.auth", true);
@@ -62,7 +57,7 @@ public class EmailService {
         message.setFrom(new InternetAddress("vatochitaia6@gmail.com"));
         message.setRecipients(
                 Message.RecipientType.TO, InternetAddress.parse(receiver.getEmail()));
-        message.setSubject(subject);
+        message.setSubject("");
 
 
 

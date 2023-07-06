@@ -24,12 +24,14 @@ public class BalanceService {
     private final CommandRepository commandRepository;
     private final UserCommandRepository userCommandRepository;
     private final UserRepository userRepository;
+    private final UserFillBalanceRepository userFillBalanceRepository;
 
 
 
 
     @Transactional
-    public void fillBalance(String username,@PositiveOrZero BigDecimal amount) {
+    public void fillBalance(String username, String stringAmount) {
+        BigDecimal amount = new BigDecimal(stringAmount);
         Optional<Balance> balanceOptional = balanceRepository.getUserBalanceByUserName(username);
         Balance balance = balanceOptional.orElseThrow(UserNotFoundException::new);
         balance.setMoney(balance.getMoney().add(amount));
@@ -39,6 +41,7 @@ public class BalanceService {
 
         UserFillBalanceTransaction transaction = UserFillBalanceTransaction.builder().status(TransactionStatus.SUCCESSFUL).amount(amount)
                 .transaction(genericTransaction).time(LocalDateTime.now()).balance(balance).build();
+        userFillBalanceRepository.save(transaction);
 
     }
 
@@ -59,7 +62,7 @@ public class BalanceService {
 
         }
 
-        if(balanceSender.getMoney().compareTo(amount)==-1) {
+        if(balanceSender.getMoney().compareTo(amount) < 0) {
             throw new InsufficientBalanceException();
 
         }

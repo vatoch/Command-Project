@@ -30,7 +30,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserCommand> commands;
 
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.EAGER)
     private Balance balance;
 
     @OneToMany(mappedBy = "receiver",cascade = CascadeType.ALL)

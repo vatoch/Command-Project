@@ -32,11 +32,13 @@ public class TransactionService {
 
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void transferMoney(String sender,String receiver,@PositiveOrZero BigDecimal amount) {
-        Optional<Balance> senderOptional = balanceRepository.getUserBalanceByUserName(sender);
-        Optional<Balance> receiverOptional = balanceRepository.getUserBalanceByUserName(receiver);
-        Balance balanceSender = senderOptional.orElseThrow(UserNotFoundException::new);
-        Balance balanceReceiver = receiverOptional.orElseThrow(UserNotFoundException::new);
+    public void transferMoney(String sender,String receiver, String stringAmount) {
+        BigDecimal amount = new BigDecimal(stringAmount.substring(0,stringAmount.length()-1));
+        receiver = receiver.toLowerCase();
+        Balance balanceSender = balanceRepository.getUserBalanceByUserName(sender).orElseThrow(UserNotFoundException::new);
+        Balance balanceReceiver = balanceRepository.getUserBalanceByUserName(receiver).orElseThrow(UserNotFoundException::new);
+
+
         UserTransaction userTransaction = new UserTransaction();
         userTransaction.setAmount(amount);
         userTransaction.setSender(balanceSender);
