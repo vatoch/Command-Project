@@ -39,8 +39,6 @@ public class UserService {
 
     }
 
-
-
     @Transactional
     public void sendFriendRequest(String sender,String receiver){
         Optional<UserFriend> userF1 = userFriendRepository.finDbyUserNames(sender,receiver);

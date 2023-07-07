@@ -1,5 +1,6 @@
 package com.app.myproject.controller;
 
+import com.app.myproject.annotations.TimeLog;
 import com.app.myproject.service.AssemblyAiService;
 import com.app.myproject.service.commandservice.MainService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class MainController {
     private final AssemblyAiService assemblyAiService;
 
     @PostMapping("/command")
+    @TimeLog
     public ResponseEntity<Void> executeCommand(@RequestHeader(name = "username") String username,@RequestBody byte[] data) throws IOException {
         service.execute(username,token,data);
         return ResponseEntity.ok().build();

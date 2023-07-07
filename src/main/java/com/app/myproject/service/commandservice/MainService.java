@@ -21,7 +21,7 @@ public class MainService {
         String id = assemblyAiService.getId(accesstoken,audioUrl);
         String text = assemblyAiService.convertAudioToText(accesstoken,id);
         String[] words = text.split("\\s+");
-        GenericService service = serviceStorage.getMap().get(words[0] + " " + words[1]);
+        GenericService service = serviceStorage.getMap().get(words[0].replace(".","") + " " + words[1].replace(".",""));
         String [] params = new String[words.length+1];
         params[0] = username;
         for(int i = 0;i<words.length;i++) {

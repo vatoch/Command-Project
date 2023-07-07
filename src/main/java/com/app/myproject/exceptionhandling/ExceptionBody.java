@@ -10,13 +10,9 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class ExceptionBody {
 
     private String message;
-    @Builder.Default
-    private LocalDateTime exceptionTime = LocalDateTime.now();
-
 
 
 }

@@ -1,9 +1,12 @@
 package com.app.myproject.service;
 
 import com.app.myproject.entity.User;
+import com.app.myproject.entity.UserCommand;
 import com.app.myproject.entity.UserFriend;
+import com.app.myproject.exceptions.CommandNotOwnedException;
 import com.app.myproject.exceptions.NotFriendsException;
 import com.app.myproject.exceptions.UserNotFoundException;
+import com.app.myproject.repo.UserCommandRepository;
 import com.app.myproject.repo.UserFriendRepository;
 import com.app.myproject.repo.UserRepository;
 import jakarta.mail.*;
@@ -25,19 +28,26 @@ public class EmailService {
 
     private final UserFriendRepository userFriendRepository;
     private final UserRepository userRepository;
+    private final UserCommandRepository userCommandRepository;
 
 
     @Transactional
     public void sendEmail(String username,String receiverUsername,String text) throws MessagingException {
         Optional<User> user1 = userRepository.findByUsername(username);
-        Optional<User> user2 = userRepository.findByUsername(receiverUsername);
+        Optional<User> user2 = userRepository.findByUsername(receiverUsername.replace(".",""));
+        Optional<User> user3 = userRepository.findByUsername(receiverUsername.toLowerCase().replace(".",""));
+        if(user2.isEmpty()&&user3.isEmpty()) {
+            throw new UserNotFoundException();
+        }
         User sender = user1.orElseThrow(UserNotFoundException::new);
-        User receiver = user2.orElseThrow(UserNotFoundException::new);
-        Optional<UserFriend> userFriend1 = userFriendRepository.finDbyUserNames(username,receiverUsername);
-        Optional<UserFriend> userFriend2 = userFriendRepository.finDbyUserNames(receiverUsername,username);
+        User receiver = user2.orElseGet(user3::get);
+        String receiverUsernameReal = receiver.getUsername();
+        Optional<UserFriend> userFriend1 = userFriendRepository.finDbyUserNames(username,receiverUsernameReal);
+        Optional<UserFriend> userFriend2 = userFriendRepository.finDbyUserNames(receiverUsernameReal,username);
+        UserCommand userCommand = userCommandRepository.findByUsernameAndCommandName(username,"Transfer money").orElseThrow(CommandNotOwnedException::new);
+
         if(userFriend1.isEmpty()&&userFriend2.isEmpty()) {
             throw new NotFriendsException();
-
         }
 
 

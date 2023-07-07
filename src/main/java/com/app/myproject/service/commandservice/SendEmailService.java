@@ -20,7 +20,7 @@ public class SendEmailService implements GenericService {
             builder.append(args[i]).append(" ");
         }
         try {
-            emailService.sendEmail(args[0], args[4].replace(".","").toLowerCase(), builder.toString());
+            emailService.sendEmail(args[0], args[4].replace(".",""), builder.toString());
         }catch(MessagingException e) {
             e.printStackTrace();
         }

@@ -17,6 +17,7 @@ import java.util.Properties;
 
 @SpringBootApplication
 @RequiredArgsConstructor
+
 public class MyprojectApplication {
 
 	@Bean
@@ -28,6 +29,8 @@ public class MyprojectApplication {
 	public ObjectMapper mapper() {
 		return new ObjectMapper();
 	}
+
+
 
 
 

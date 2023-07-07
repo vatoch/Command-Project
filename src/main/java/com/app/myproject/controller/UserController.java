@@ -8,19 +8,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/user")
 @RequiredArgsConstructor
-public class AdminController {
+public class UserController {
 
     private final CommandRepository repository;
     private final UserService userService;
-    @PostMapping("/add")
-    public ResponseEntity<Void> addCommand(@RequestBody Command command) {
-        repository.save(command);
-        return ResponseEntity.ok().build();
-    }
+
 
     @PostMapping("/register")
     public ResponseEntity<Void> registerUser(@RequestBody User user) {
@@ -35,10 +33,26 @@ public class AdminController {
 
     }
 
-
     @PostMapping("/friendrequest/accept/{receiver}")
     public ResponseEntity<Void> acceptFriendRequest(@PathVariable String receiver,@RequestHeader(name = "username") String username) {
         userService.acceptFriendRequest(receiver,username);
+        return ResponseEntity.ok().build();
+
+    }
+    @GetMapping("/friends")
+    public ResponseEntity<List<User>> getFriends(@RequestHeader(name = "username") String username) {
+        return ResponseEntity.ok(userService.getFriends(username));
+    }
+
+    @PostMapping("/friendrequest/reject/{receiver}")
+    public ResponseEntity<Void> rejectFriendRequest(@RequestHeader(name = "username") String username , @PathVariable String receiver) {
+        userService.rejectFriendRequest(username,receiver);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/delete/{receiver}")
+    public ResponseEntity<Void> deleteFriend(@RequestHeader(name = "username") String username,@PathVariable String receiver) {
+        userService.deleteFriend(username,receiver);
         return ResponseEntity.ok().build();
 
     }

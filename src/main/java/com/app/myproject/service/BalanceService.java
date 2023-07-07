@@ -33,6 +33,7 @@ public class BalanceService {
     public void fillBalance(String username, String stringAmount) {
         BigDecimal amount = new BigDecimal(stringAmount);
         Optional<Balance> balanceOptional = balanceRepository.getUserBalanceByUserName(username);
+        UserCommand userCommand = userCommandRepository.findByUsernameAndCommandName(username,"Deposit money").orElseThrow(CommandNotOwnedException::new);
         Balance balance = balanceOptional.orElseThrow(UserNotFoundException::new);
         balance.setMoney(balance.getMoney().add(amount));
         balance.setLastUpdated(LocalDateTime.now());
@@ -50,6 +51,8 @@ public class BalanceService {
 
         Optional<UserFriend> userFriendOptional1 = userFriendRepository.finDbyUserNames(sender,receiver);
         Optional<UserFriend> userFriendOptional2 = userFriendRepository.finDbyUserNames(receiver,sender);
+        UserCommand userCommand = userCommandRepository.findByUsernameAndCommandName(sender,"Transfer money").orElseThrow(CommandNotOwnedException::new);
+
         if(userFriendOptional2.isEmpty()&&userFriendOptional1.isEmpty()) {
             throw new NotFriendsException();
         }
@@ -74,13 +77,11 @@ public class BalanceService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void buyCommand(String username,String command) {
+    public void buyCommand(String username,String command,Balance balance) {
         Optional<Command> command1 = commandRepository.findByName(command);
-        Optional<Balance> balanceOptional = balanceRepository.getUserBalanceByUserName(username);
         Optional<User> userOptional = userRepository.findByUsername(username);
 
         Command command2 = command1.orElseThrow(CommandNotFoundException::new);
-        Balance balance = balanceOptional.orElseThrow(UserNotFoundException::new);
 
         if(balance.getMoney().compareTo(command2.getPrice())==-1) {
             throw new InsufficientBalanceException();
@@ -95,6 +96,7 @@ public class BalanceService {
         userCommand.setCommand(command2);
         userCommand.setUser(userOptional.orElseThrow(UserNotFoundException::new));
         balance.setMoney(balance.getMoney().subtract(command2.getPrice()));
+        userCommandRepository.save(userCommand);
 
 
 
