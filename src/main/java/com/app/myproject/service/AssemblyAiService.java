@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.io.IOException;
@@ -25,7 +26,7 @@ public class AssemblyAiService {
     @Value("${transformUrl}")
     private String transformUrl;
 
-    public String getAudioUrl(String accessToken, byte[] fileData) throws IOException {
+    public String getAudioUrl(String accessToken, MultipartFile fileData) throws IOException {
 
         // Set request headers
         HttpHeaders headers = new HttpHeaders();
@@ -35,7 +36,7 @@ public class AssemblyAiService {
 
         // Create the multipart request body
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", fileData);
+        body.add("file", fileData.getBytes());
 
 
         String responseBody = webClient.post()

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DepositBalanceService implements GenericService{
     private final BalanceService balanceService;
-    private String name;
+    private static final String name = "Deposit money";
     @Override
     public void execute(String... args) {
         balanceService.fillBalance(args[0],args[3].replace(".",""));
@@ -19,9 +19,5 @@ public class DepositBalanceService implements GenericService{
     public String getName() {
         return name;
     }
-    @PostConstruct
-    public void init() {
-        name = "Deposit money";
 
-    }
 }

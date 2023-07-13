@@ -1,20 +1,24 @@
 package com.app.myproject.service;
 
+import com.app.myproject.dto.BalanceDTO;
 import com.app.myproject.entity.*;
 import com.app.myproject.enums.FriendshipStatus;
 import com.app.myproject.enums.TransactionStatus;
 import com.app.myproject.enums.TransactionType;
 import com.app.myproject.exceptions.*;
+import com.app.myproject.mapper.BalanceMapper;
 import com.app.myproject.repo.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,18 +29,23 @@ public class BalanceService {
     private final UserCommandRepository userCommandRepository;
     private final UserRepository userRepository;
     private final UserFillBalanceRepository userFillBalanceRepository;
+    private final Logger logger = LoggerFactory.getLogger("myLog");
 
 
 
 
     @Transactional
     public void fillBalance(String username, String stringAmount) {
+        Balance balance = balanceRepository.getUserBalanceByUserName(username).orElseThrow(UserNotFoundException::new);
+        if(userCommandRepository.existsByUsernameAndCommandName(username,"Deposit money")) {
+            throw new CommandNotOwnedException();
+        }
         BigDecimal amount = new BigDecimal(stringAmount);
-        Optional<Balance> balanceOptional = balanceRepository.getUserBalanceByUserName(username);
-        UserCommand userCommand = userCommandRepository.findByUsernameAndCommandName(username,"Deposit money").orElseThrow(CommandNotOwnedException::new);
-        Balance balance = balanceOptional.orElseThrow(UserNotFoundException::new);
+
+
         balance.setMoney(balance.getMoney().add(amount));
         balance.setLastUpdated(LocalDateTime.now());
+
         GenericTransaction genericTransaction = new GenericTransaction();
         genericTransaction.setTransactionType(TransactionType.FILL_BALANCE_TRANSACTION);
 
@@ -49,20 +58,16 @@ public class BalanceService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void transferMoney(String sender,String receiver,Balance balanceSender,Balance balanceReceiver,@PositiveOrZero BigDecimal amount) {
 
-        Optional<UserFriend> userFriendOptional1 = userFriendRepository.finDbyUserNames(sender,receiver);
-        Optional<UserFriend> userFriendOptional2 = userFriendRepository.finDbyUserNames(receiver,sender);
-        UserCommand userCommand = userCommandRepository.findByUsernameAndCommandName(sender,"Transfer money").orElseThrow(CommandNotOwnedException::new);
 
-        if(userFriendOptional2.isEmpty()&&userFriendOptional1.isEmpty()) {
-            throw new NotFriendsException();
+
+        if(!userCommandRepository.existsByUsernameAndCommandName(sender,"Transfer money")) {
+            throw new CommandNotOwnedException();
         }
-        UserFriend userFriend = userFriendOptional1.orElseGet(userFriendOptional2::get);
 
+        UserFriend userFriend = userFriendRepository.finDbyUserNames(sender,receiver).orElseThrow(NotFriendsException::new);
 
         if(userFriend.getStatus()!= FriendshipStatus.FRIENDS) {
-
             throw new NotFriendsException();
-
         }
 
         if(balanceSender.getMoney().compareTo(amount) < 0) {
@@ -74,33 +79,39 @@ public class BalanceService {
 
 
 
+
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void buyCommand(String username,String command,Balance balance) {
-        Optional<Command> command1 = commandRepository.findByName(command);
-        Optional<User> userOptional = userRepository.findByUsername(username);
+    public void buyCommand(String username,String id,Balance balance) {
 
-        Command command2 = command1.orElseThrow(CommandNotFoundException::new);
+        User user= userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
 
-        if(balance.getMoney().compareTo(command2.getPrice())==-1) {
+        Command command2 = commandRepository.findById(UUID.fromString(id)).orElseThrow(CommandNotFoundException::new);
+
+        if(balance.getMoney().compareTo(command2.getPrice()) < 0) {
             throw new InsufficientBalanceException();
-
         }
-        Optional<UserCommand> userCommandOptional = userCommandRepository.findByUsernameAndCommandName(username,command);
+        Optional<UserCommand> userCommandOptional = userCommandRepository.findByUserNameAndId(username,UUID.fromString(id));
         if(userCommandOptional.isPresent()) {
             throw new CommandAlreadyBoughtException();
 
         }
         UserCommand userCommand = new UserCommand();
         userCommand.setCommand(command2);
-        userCommand.setUser(userOptional.orElseThrow(UserNotFoundException::new));
+        userCommand.setUser(user);
         balance.setMoney(balance.getMoney().subtract(command2.getPrice()));
         userCommandRepository.save(userCommand);
 
 
 
 
+    }
+
+
+    public BalanceDTO getBalance(String username) {
+        Balance balance = balanceRepository.getUserBalanceByUserName(username).orElseThrow(UserNotFoundException::new);
+        return BalanceMapper.balanceToDTO(balance);
     }
 
 

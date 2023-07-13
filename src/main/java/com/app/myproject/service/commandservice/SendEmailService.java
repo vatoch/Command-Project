@@ -19,11 +19,8 @@ public class SendEmailService implements GenericService {
         for(int i = 5;i<args.length;i++) {
             builder.append(args[i]).append(" ");
         }
-        try {
-            emailService.sendEmail(args[0], args[4].replace(".",""), builder.toString());
-        }catch(MessagingException e) {
-            e.printStackTrace();
-        }
+
+        emailService.sendEmail(args[0], args[4].replace(".",""), builder.toString());
 
     }
 

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TransferMoneyService implements GenericService {
 
-    private String name;
+    private static final String name = "Transfer money";
     private final TransactionService transactionService;
 
     @Override
@@ -20,10 +20,6 @@ public class TransferMoneyService implements GenericService {
     @Override
     public String getName() {
         return name;
-    }
-    @PostConstruct
-    public void init() {
-        name = "Transfer money";
     }
 
 }

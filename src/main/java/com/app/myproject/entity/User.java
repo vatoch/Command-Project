@@ -1,8 +1,7 @@
 package com.app.myproject.entity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +10,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class User {
 
     @Id
@@ -27,15 +28,14 @@ public class User {
     private String phone;
 
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<UserCommand> commands;
 
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
     private Balance balance;
 
     @OneToMany(mappedBy = "receiver",cascade = CascadeType.ALL)
     private List<UserFriend> friends;
-    @Version
-    private Long version;
+
 
 }

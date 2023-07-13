@@ -43,11 +43,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body,HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ExceptionBody> handleRuntimeException(RuntimeException runtimeException,WebRequest webRequest) {
-        ExceptionBody body= ExceptionBody.builder().message("Internal server error").build();
-        return new ResponseEntity<>(body,HttpStatus.BAD_REQUEST);
-    }
+//    @ExceptionHandler(RuntimeException.class)
+//    public ResponseEntity<ExceptionBody> handleRuntimeException(RuntimeException runtimeException,WebRequest webRequest) {
+//        ExceptionBody body= ExceptionBody.builder().message("Internal server error").build();
+//        return new ResponseEntity<>(body,HttpStatus.BAD_REQUEST);
+//    }
 
 
 

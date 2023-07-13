@@ -15,6 +15,10 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,61 +28,47 @@ import java.util.Properties;
 
 @Component
 @RequiredArgsConstructor
-public class EmailService {
+public class EmailService  {
 
     private final UserFriendRepository userFriendRepository;
     private final UserRepository userRepository;
     private final UserCommandRepository userCommandRepository;
+    private final JavaMailSender javaMailSender;
 
 
     @Transactional
-    public void sendEmail(String username,String receiverUsername,String text) throws MessagingException {
-        Optional<User> user1 = userRepository.findByUsername(username);
-        Optional<User> user2 = userRepository.findByUsername(receiverUsername.replace(".",""));
-        Optional<User> user3 = userRepository.findByUsername(receiverUsername.toLowerCase().replace(".",""));
-        if(user2.isEmpty()&&user3.isEmpty()) {
-            throw new UserNotFoundException();
-        }
-        User sender = user1.orElseThrow(UserNotFoundException::new);
-        User receiver = user2.orElseGet(user3::get);
-        String receiverUsernameReal = receiver.getUsername();
-        Optional<UserFriend> userFriend1 = userFriendRepository.finDbyUserNames(username,receiverUsernameReal);
-        Optional<UserFriend> userFriend2 = userFriendRepository.finDbyUserNames(receiverUsernameReal,username);
-        UserCommand userCommand = userCommandRepository.findByUsernameAndCommandName(username,"Transfer money").orElseThrow(CommandNotOwnedException::new);
+    public void sendEmail(String username,String receiverUsername,String text)  {
 
-        if(userFriend1.isEmpty()&&userFriend2.isEmpty()) {
-            throw new NotFriendsException();
-        }
-
-
-        Properties prop = new Properties();
-        prop.put("mail.smtp.auth", true);
-        prop.put("mail.smtp.starttls.enable", "true");
-        prop.put("mail.smtp.host", "smtp.gmail.com");
-        prop.put("mail.smtp.port", 587);
-        prop.put("mail.smtp.ssl.trust", "smtp.gmail.com");
-        Session session = Session.getInstance(prop, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("vatochitaia6@gmail.com", "vwtfsspgxzfhwdfl");
+            if (!userRepository.existsByUsername(username)) {
+                throw new UserNotFoundException();
             }
-        });
-        Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress("vatochitaia6@gmail.com"));
-        message.setRecipients(
-                Message.RecipientType.TO, InternetAddress.parse(receiver.getEmail()));
-        message.setSubject("");
+
+            User receiver = userRepository.findByUsername(receiverUsername.replace(".", "")).orElseGet(
+                    () -> userRepository.findByUsername(receiverUsername.toLowerCase().replace(".", "")).orElseThrow(UserNotFoundException::new)
+            );
+            String receiverUsernameReal = receiver.getUsername();
+
+            if (!userCommandRepository.existsByUsernameAndCommandName(username, "Send email")) {
+                throw new CommandNotOwnedException();
+            }
+
+            if (!userFriendRepository.existsFriends(username, receiverUsernameReal)) {
+                throw new NotFriendsException();
+            }
 
 
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+        try {
+            mimeMessageHelper.setFrom("vatochitaia6@gmail.com");
+            mimeMessageHelper.setTo(receiver.getEmail());
+            mimeMessageHelper.setSubject("null");
+            mimeMessageHelper.setText(text);
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
 
-        MimeBodyPart mimeBodyPart = new MimeBodyPart();
-        mimeBodyPart.setContent(text + "\n" + "\n Sent by " + username, "text/html; charset=utf-8");
-        Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(mimeBodyPart);
-
-        message.setContent(multipart);
-
-        Transport.send(message);
     }
 
 

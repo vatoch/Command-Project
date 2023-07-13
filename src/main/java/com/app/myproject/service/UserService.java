@@ -1,23 +1,26 @@
 package com.app.myproject.service;
 
-import com.app.myproject.entity.Balance;
-import com.app.myproject.entity.User;
-import com.app.myproject.entity.UserFriend;
+import com.app.myproject.dto.CommandDTO;
+import com.app.myproject.dto.UserDTO;
+import com.app.myproject.entity.*;
 import com.app.myproject.enums.FriendshipStatus;
-import com.app.myproject.exceptions.UserNotFoundException;
-import com.app.myproject.repo.UserFriendRepository;
-import com.app.myproject.repo.UserRepository;
+import com.app.myproject.exceptions.*;
+import com.app.myproject.mapper.CommandMapper;
+import com.app.myproject.mapper.UserMapper;
+import com.app.myproject.repo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,59 +29,61 @@ public class UserService {
 
     private final UserRepository repo;
     private final UserFriendRepository userFriendRepository;
+    private final CommandRepository commandRepository;
+    private final UserRepository userRepository;
+    private final BalanceRepository balanceRepository;
+    private final UserCommandRepository userCommandRepository;
 
 
     @Transactional
     public void registerUser(User user) {
         Balance balance = new Balance();
-        balance.setMoney(BigDecimal.valueOf(0));
+        balance.setMoney(BigDecimal.valueOf(1000));
         balance.setUser(user);
         balance.setLastUpdated(LocalDateTime.now());
         user.setBalance(balance);
+        UserCommand userCommand = new UserCommand();
+        userCommand.setUser(user);
+        userCommand.setCommand(commandRepository.findById(UUID.fromString("b94b91be-0b05-4673-9126-eb8add54a726")).orElseThrow(CommandNotFoundException::new));
+        user.setCommands(new ArrayList<>());
+        user.getCommands().add(userCommand);
         repo.save(user);
 
     }
 
     @Transactional
-    public void sendFriendRequest(String sender,String receiver){
-        Optional<UserFriend> userF1 = userFriendRepository.finDbyUserNames(sender,receiver);
-        Optional<UserFriend> userF2 = userFriendRepository.finDbyUserNames(receiver,sender);
-        if(userF1.isPresent() || userF2.isPresent()) {
-            UserFriend userFriend1 = userF1.orElseGet(userF2::get);
-            if(userFriend1.getStatus()==FriendshipStatus.FRIENDS) {
-                throw new UnsupportedOperationException("User already in friend list");
-            } else if(userFriend1.getStatus()==FriendshipStatus.PENDING) {
-                throw new UnsupportedOperationException("Pending request");
+    public void sendFriendRequest(String sender,String id){
+        User user1 = repo.findByUsername(sender).orElseThrow(UserNotFoundException::new);
+        User user2 = repo.findById(UUID.fromString(id)).orElseThrow(UserNotFoundException::new);
+
+        UserFriend userFriend = userFriendRepository.findByUsernameAndId(sender,UUID.fromString(id)).orElseGet(UserFriend::new);
+
+        if(userFriend.getStatus()!=null) {
+            if(userFriend.getStatus().equals(FriendshipStatus.FRIENDS)) {
+                throw new AlreadyFriendsException();
+            } else if(userFriend.getStatus().equals(FriendshipStatus.PENDING)) {
+                throw new FriendshipStatusPendingException();
             } else {
-                userFriend1.setStatus(FriendshipStatus.PENDING);
-                return;
-
+                userFriend.setStatus(FriendshipStatus.PENDING);
             }
-        }
-        Optional<User> user1 = repo.findByUsername(sender);
-        Optional<User> user2 = repo.findByUsername(receiver);
-        if(user1.isEmpty()||user2.isEmpty()) {
-            throw new UserNotFoundException();
-
+        } else {
+            userFriend.setReceiver(user2);
+            userFriend.setSender(user1);
+            userFriend.setStatus(FriendshipStatus.PENDING);
         }
 
-        UserFriend userfriend2 = UserFriend.builder().status(FriendshipStatus.PENDING).date(LocalDateTime.now()).receiver(user2.get())
-                .sender(user1.get()).build();
-        userFriendRepository.save(userfriend2);
+
+       userFriendRepository.save(userFriend);
 
 
     }
 
     @Transactional
-    public void acceptFriendRequest(String sender,String receiver) {
-        Optional<UserFriend> userFriend = userFriendRepository.finDbyUserNames(sender,receiver);
-        UserFriend userFriend1 = userFriend.orElseThrow(UserNotFoundException::new);
-
-
-        if(userFriend1.getStatus()!=FriendshipStatus.PENDING) {
-            throw new UnsupportedOperationException("Can't accept friend request");
+    public void acceptFriendRequest(String sender,String id) {
+        UserFriend userFriend1 = userFriendRepository.findByUsAndId(sender,UUID.fromString(id)).orElseThrow(UnsupportedOperationException::new);
+        if(!userFriend1.getStatus().equals(FriendshipStatus.PENDING)) {
+            throw new UnsupportedOperationException();
         }
-
 
         userFriend1.setStatus(FriendshipStatus.FRIENDS);
         userFriend1.setDate(LocalDateTime.now());
@@ -86,9 +91,9 @@ public class UserService {
     }
 
     @Transactional
-    public void rejectFriendRequest(String sender,String receiver) {
-        Optional<UserFriend> userFriend = userFriendRepository.finDbyUserNames(receiver,sender);
-        UserFriend userFriend1 = userFriend.orElseThrow(UserNotFoundException::new);
+    public void rejectFriendRequest(String sender,String id) {
+
+        UserFriend userFriend1 = userFriendRepository.findByUsAndId(sender,UUID.fromString(id)).orElseThrow(UnsupportedOperationException::new);
         if(userFriend1.getStatus()!=FriendshipStatus.PENDING) {
             throw new UnsupportedOperationException("Can't reject friend request");
         }
@@ -97,40 +102,50 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteFriend(String sender,String receiver) {
-        Optional<UserFriend> userFriend1 = userFriendRepository.finDbyUserNames(sender,receiver);
-        Optional<UserFriend> userFriend2 = userFriendRepository.finDbyUserNames(receiver,sender);
-        if(userFriend1.isEmpty()&&userFriend2.isEmpty()) {
-            throw new UnsupportedOperationException("Can't delete friend doesn't exist");
-        }
-        if(userFriend1.isPresent()) {
-            if(userFriend1.get().getStatus()==FriendshipStatus.DELETED||userFriend1.get().getStatus()==FriendshipStatus.PENDING) {
-                throw new UnsupportedOperationException("Already deleted or pending request");
-            }
-            userFriend1.get().setStatus(FriendshipStatus.DELETED);
-        } else  {
-            if(userFriend2.get().getStatus()==FriendshipStatus.DELETED||userFriend2.get().getStatus()==FriendshipStatus.PENDING) {
-                throw new UnsupportedOperationException("Already deleted or pending request");
-            }
-            userFriend2.get().setStatus(FriendshipStatus.DELETED);
+    public void deleteFriend(String sender,String id) {
+        UserFriend userFriend1 = userFriendRepository.findByUsernameAndId(sender,UUID.fromString(id)).orElseThrow(NotFriendsException::new);
 
+        if(!userFriend1.getStatus().equals(FriendshipStatus.FRIENDS)) {
+            throw new CantDeleteFriendException();
         }
+
+        userFriend1.setStatus(FriendshipStatus.DELETED);
 
 
     }
     @Transactional
-    public List<User> getFriends(String username) {
-        Optional<List<UserFriend>> userFriends = userFriendRepository.getFriends(username);
-        List<UserFriend> userFriends1 = userFriends.orElseGet(List::of);
-        List<User> users = new ArrayList<>();
-        userFriends1.forEach(x-> {
-            if(x.getSender().getUsername().equals(username)) {
-                users.add(x.getReceiver());
-            } else {
-                users.add(x.getSender());
-            }
-        });
-        return users;
+    public Page<User> getFriends(String username,Pageable pageable) {
+        if(!userRepository.existsByUsername(username)) {
+            throw new UserNotFoundException();
+        }
+        return userFriendRepository.getFriends2(username,pageable);
+
+    }
+
+
+    public Page<CommandDTO> getMyCommands(String username,Pageable pageable) {
+        return commandRepository.getCommandsByUsername(username,pageable).map(CommandMapper::commandToDto);
+    }
+
+
+    public UserDTO viewProfile(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+        return UserMapper.userToUserDTO(user);
+    }
+
+    @Transactional
+    public void fillBalance(String username,String money) {
+        BigDecimal bigDecimal = new BigDecimal(money);
+        if(bigDecimal.compareTo(BigDecimal.ZERO)<0) {
+            throw new IllegalArgumentException();
+        }
+        Balance balance = balanceRepository.getUserBalanceByUserName(username).orElseThrow(UserNotFoundException::new);
+        balance.setMoney(balance.getMoney().add(bigDecimal));
+    }
+
+    public void deleteAccount(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
+        userRepository.delete(user);
 
     }
 

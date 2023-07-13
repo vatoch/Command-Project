@@ -10,13 +10,16 @@ import com.app.myproject.repo.CommandRepository;
 import com.app.myproject.repo.UserCommandTransactionRepository;
 import com.app.myproject.repo.UserTransactionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,41 +35,39 @@ public class TransactionService {
 
     @Transactional
     public void transferMoney(String sender,String receiver, String stringAmount) {
-        BigDecimal amount = new BigDecimal(stringAmount.substring(0,stringAmount.length()-1));
-        Balance balanceSender = balanceRepository.getUserBalanceByUserName(sender).orElseThrow(UserNotFoundException::new);
-        Optional<Balance> balanceReceiverOptional1 = balanceRepository.getUserBalanceByUserName(receiver.replace(".",""));
-        Optional<Balance> balanceReceiverOptional2 = balanceRepository.getUserBalanceByUserName(receiver.toLowerCase().replace(".",""));
-        if(balanceReceiverOptional2.isEmpty()&&balanceReceiverOptional1.isEmpty()) {
-            throw new UserNotFoundException();
-        }
-        Balance balanceReceiver = balanceReceiverOptional1.orElseGet(balanceReceiverOptional2::get);
 
-        UserTransaction userTransaction = new UserTransaction();
-        userTransaction.setAmount(amount);
-        userTransaction.setSender(balanceSender);
-        userTransaction.setReceiver(balanceReceiver);
-        userTransaction.setCreationTime(LocalDateTime.now());
+        BigDecimal amount = new BigDecimal(stringAmount.substring(0,stringAmount.length()-1));
+
+        Balance balanceSender = balanceRepository.getUserBalanceByUserName(sender).orElseThrow(UserNotFoundException::new);
+
+
+        Balance balanceReceiver = balanceRepository.getUserBalanceByUserName(receiver.replace(".",""))
+                .orElseGet(()->balanceRepository.getUserBalanceByUserName(receiver.toLowerCase().replace(".","")).orElseThrow(UserNotFoundException::new));
+
         GenericTransaction genericTransaction = new GenericTransaction();
         genericTransaction.setTransactionType(TransactionType.USER_TO_USER_TRANSACTION);
-        userTransaction.setTransaction(genericTransaction);
+
+        UserTransaction userTransaction = UserTransaction.builder()
+                .amount(amount).sender(balanceSender).receiver(balanceReceiver)
+                .creationTime(LocalDateTime.now()).transaction(genericTransaction).build();
         try {
             userTransaction.setStatus(TransactionStatus.SUCCESSFUL);
             balanceService.transferMoney(sender,balanceReceiver.getUser().getUsername(),balanceSender,balanceReceiver,amount);
         }catch (NotFriendsException | InsufficientBalanceException e) {
             userTransaction.setStatus(TransactionStatus.DECLINED);
+
         }
         userTransactionRepository.save(userTransaction);
     }
 
     @Transactional
-    public void buyCommand(String username,String command) {
-        Optional<Balance> balanceOptional = balanceRepository.getUserBalanceByUserName(username);
+    public void buyCommand(String username,String id) {
+        Balance balance = balanceRepository.getUserBalanceByUserName(username)
+                .orElseThrow(UserNotFoundException::new);
 
+        Command command1 = commandRepository.findById(UUID.fromString(id))
+                .orElseThrow(CommandNotFoundException::new);
 
-
-        Optional<Command> commandOptional = commandRepository.findByName(command);
-        Balance balance = balanceOptional.orElseThrow(UserNotFoundException::new);
-        Command command1 = commandOptional.orElseThrow(CommandNotFoundException::new);
         UserCommandTransaction transaction = new UserCommandTransaction();
         transaction.setCommand(command1);
         transaction.setBuyer(balance);
@@ -77,10 +78,11 @@ public class TransactionService {
         transaction.setAmount(command1.getPrice());
         try {
             transaction.setStatus(TransactionStatus.SUCCESSFUL);
-            balanceService.buyCommand(balance.getUser().getUsername(),command,balance);
+            balanceService.buyCommand(balance.getUser().getUsername(),id,balance);
 
         }catch(InsufficientBalanceException | CommandAlreadyBoughtException e) {
             transaction.setStatus(TransactionStatus.DECLINED);
+            throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED);
         }
         userCommandTransactionRepository.save(transaction);
     }
