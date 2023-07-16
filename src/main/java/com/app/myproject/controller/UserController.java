@@ -97,10 +97,6 @@ public class UserController {
         userService.deleteAccount(username);
         return ResponseEntity.status(204).build();
    }
-//   @PostMapping("/email/send/{username}")
-//   public ResponseEntity<Void> sendEmailTest(@RequestHeader(name = "username") String username, @PathVariable("username") String username1) {
-//        emailService.sendEmail(username,username1,"dasdasdasdasdasdasdasd");
-//        return ResponseEntity.ok().build();
-//   }
+
 
 }
