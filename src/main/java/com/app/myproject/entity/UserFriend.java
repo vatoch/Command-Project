@@ -1,7 +1,7 @@
 package com.app.myproject.entity;
 
 
-import com.app.myproject.enums.FriendshipStatus;
+import com.app.myproject.model.enums.FriendshipStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

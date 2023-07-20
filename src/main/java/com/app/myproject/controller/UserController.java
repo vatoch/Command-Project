@@ -1,11 +1,11 @@
 package com.app.myproject.controller;
 
-import com.app.myproject.dto.BalanceDTO;
-import com.app.myproject.dto.CommandDTO;
-import com.app.myproject.dto.UserDTO;
+import com.app.myproject.model.dto.BalanceDTO;
+import com.app.myproject.model.dto.CommandDTO;
+import com.app.myproject.model.dto.UserDTO;
 import com.app.myproject.entity.User;
 import com.app.myproject.facade.UserFacade;
-import com.app.myproject.param.UserParam;
+import com.app.myproject.model.param.UserParam;
 import com.app.myproject.service.BalanceService;
 import com.app.myproject.service.CommandService;
 import com.app.myproject.service.EmailService;

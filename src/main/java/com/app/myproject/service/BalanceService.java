@@ -1,10 +1,11 @@
 package com.app.myproject.service;
 
-import com.app.myproject.dto.BalanceDTO;
+import com.app.myproject.exceptionhandling.exceptions.*;
+import com.app.myproject.model.dto.BalanceDTO;
 import com.app.myproject.entity.*;
-import com.app.myproject.enums.FriendshipStatus;
-import com.app.myproject.enums.TransactionStatus;
-import com.app.myproject.enums.TransactionType;
+import com.app.myproject.model.enums.FriendshipStatus;
+import com.app.myproject.model.enums.TransactionStatus;
+import com.app.myproject.model.enums.TransactionType;
 import com.app.myproject.exceptions.*;
 import com.app.myproject.mapper.BalanceMapper;
 import com.app.myproject.repo.*;

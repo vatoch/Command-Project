@@ -1,13 +1,11 @@
 package com.app.myproject.service;
 
 import com.app.myproject.entity.User;
-import com.app.myproject.exceptions.UserNotFoundException;
+import com.app.myproject.exceptionhandling.exceptions.UserNotFoundException;
 import com.app.myproject.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

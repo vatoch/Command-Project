@@ -1,7 +1,7 @@
 package com.app.myproject.entity;
 
 
-import com.app.myproject.enums.TransactionType;
+import com.app.myproject.model.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

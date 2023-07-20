@@ -1,9 +1,10 @@
 package com.app.myproject.service;
 
-import com.app.myproject.dto.CommandDTO;
-import com.app.myproject.dto.UserDTO;
+import com.app.myproject.exceptionhandling.exceptions.*;
+import com.app.myproject.model.dto.CommandDTO;
+import com.app.myproject.model.dto.UserDTO;
 import com.app.myproject.entity.*;
-import com.app.myproject.enums.FriendshipStatus;
+import com.app.myproject.model.enums.FriendshipStatus;
 import com.app.myproject.exceptions.*;
 import com.app.myproject.mapper.CommandMapper;
 import com.app.myproject.mapper.UserMapper;

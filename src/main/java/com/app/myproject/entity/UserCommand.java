@@ -1,6 +1,5 @@
 package com.app.myproject.entity;
 
-import com.app.myproject.enums.CommandType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

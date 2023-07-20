@@ -1,4 +1,4 @@
-package com.app.myproject.param;
+package com.app.myproject.model.param;
 
 import lombok.*;
 

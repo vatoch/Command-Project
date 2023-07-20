@@ -1,4 +1,4 @@
-package com.app.myproject.enums;
+package com.app.myproject.model.enums;
 
 public enum CommandType {
 

@@ -1,6 +1,6 @@
 package com.app.myproject.entity;
 
-import com.app.myproject.enums.TransactionStatus;
+import com.app.myproject.model.enums.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

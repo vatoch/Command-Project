@@ -1,13 +1,10 @@
 package com.app.myproject.repo;
 
-import com.app.myproject.entity.User;
 import com.app.myproject.entity.UserCommand;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 

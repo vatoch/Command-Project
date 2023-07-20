@@ -1,16 +1,13 @@
 package com.app.myproject.facade;
 
-import com.app.myproject.dto.UserDTO;
-import com.app.myproject.entity.User;
+import com.app.myproject.model.dto.UserDTO;
 import com.app.myproject.mapper.UserMapper;
-import com.app.myproject.param.UserParam;
+import com.app.myproject.model.param.UserParam;
 import com.app.myproject.service.UserService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @Getter

@@ -2,8 +2,9 @@ package com.app.myproject.service;
 
 
 import com.app.myproject.entity.*;
-import com.app.myproject.enums.TransactionStatus;
-import com.app.myproject.enums.TransactionType;
+import com.app.myproject.exceptionhandling.exceptions.*;
+import com.app.myproject.model.enums.TransactionStatus;
+import com.app.myproject.model.enums.TransactionType;
 import com.app.myproject.exceptions.*;
 import com.app.myproject.repo.BalanceRepository;
 import com.app.myproject.repo.CommandRepository;
@@ -12,13 +13,11 @@ import com.app.myproject.repo.UserTransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

@@ -1,5 +1,5 @@
 package com.app.myproject.entity;
-import com.app.myproject.enums.CommandType;
+import com.app.myproject.model.enums.CommandType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;

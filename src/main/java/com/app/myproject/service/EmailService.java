@@ -1,30 +1,19 @@
 package com.app.myproject.service;
 
 import com.app.myproject.entity.User;
-import com.app.myproject.entity.UserCommand;
-import com.app.myproject.entity.UserFriend;
-import com.app.myproject.exceptions.CommandNotOwnedException;
-import com.app.myproject.exceptions.NotFriendsException;
-import com.app.myproject.exceptions.UserNotFoundException;
+import com.app.myproject.exceptionhandling.exceptions.CommandNotOwnedException;
+import com.app.myproject.exceptionhandling.exceptions.NotFriendsException;
+import com.app.myproject.exceptionhandling.exceptions.UserNotFoundException;
 import com.app.myproject.repo.UserCommandRepository;
 import com.app.myproject.repo.UserFriendRepository;
 import com.app.myproject.repo.UserRepository;
 import jakarta.mail.*;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-
-import java.util.Optional;
-import java.util.Properties;
 
 @Component
 @RequiredArgsConstructor

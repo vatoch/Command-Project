@@ -1,10 +1,10 @@
 package com.app.myproject.service;
 
 
-import com.app.myproject.dto.CommandDTO;
+import com.app.myproject.model.dto.CommandDTO;
 import com.app.myproject.entity.Command;
 import com.app.myproject.mapper.CommandMapper;
-import com.app.myproject.param.CommandParam;
+import com.app.myproject.model.param.CommandParam;
 import com.app.myproject.repo.CommandRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

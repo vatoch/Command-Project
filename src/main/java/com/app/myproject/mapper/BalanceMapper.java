@@ -1,6 +1,6 @@
 package com.app.myproject.mapper;
 
-import com.app.myproject.dto.BalanceDTO;
+import com.app.myproject.model.dto.BalanceDTO;
 import com.app.myproject.entity.Balance;
 
 public class BalanceMapper {

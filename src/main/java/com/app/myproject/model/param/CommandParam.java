@@ -1,19 +1,19 @@
-package com.app.myproject.dto;
+package com.app.myproject.model.param;
 
-
-import com.app.myproject.enums.CommandType;
+import com.app.myproject.model.enums.CommandType;
 import lombok.*;
 
 import java.math.BigDecimal;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
+@Builder
 @NoArgsConstructor
-public class CommandDTO {
+public class CommandParam {
     private String name;
-    private CommandType type;
     private BigDecimal price;
+    private CommandType type;
+
 
 }

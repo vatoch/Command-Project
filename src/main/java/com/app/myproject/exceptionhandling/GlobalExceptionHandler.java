@@ -1,6 +1,7 @@
 package com.app.myproject.exceptionhandling;
 
 
+import com.app.myproject.exceptionhandling.exceptions.*;
 import com.app.myproject.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
