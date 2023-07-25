@@ -5,7 +5,6 @@ import com.app.myproject.model.dto.CommandDTO;
 import com.app.myproject.model.dto.UserDTO;
 import com.app.myproject.entity.*;
 import com.app.myproject.model.enums.FriendshipStatus;
-import com.app.myproject.exceptions.*;
 import com.app.myproject.mapper.CommandMapper;
 import com.app.myproject.mapper.UserMapper;
 import com.app.myproject.repo.*;
@@ -33,11 +32,13 @@ public class UserService {
     private final CommandRepository commandRepository;
     private final UserRepository userRepository;
     private final BalanceRepository balanceRepository;
-    private final UserCommandRepository userCommandRepository;
 
 
     @Transactional
     public void registerUser(User user) {
+        if(repo.existsByUsername(user.getUsername())) {
+            throw new UserAlreadyExistsException();
+        }
         Balance balance = new Balance();
         balance.setMoney(BigDecimal.valueOf(1000));
         balance.setUser(user);
@@ -114,11 +115,16 @@ public class UserService {
 
 
     }
-    @Transactional
+
     public Page<User> getFriends(String username,Pageable pageable) {
         if(!userRepository.existsByUsername(username)) {
             throw new UserNotFoundException();
         }
+
+
+
+
+
         return userFriendRepository.getFriends2(username,pageable);
 
     }

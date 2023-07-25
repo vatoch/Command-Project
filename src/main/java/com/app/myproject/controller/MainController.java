@@ -4,6 +4,7 @@ import com.app.myproject.annotations.TimeLog;
 import com.app.myproject.facade.MainFacade;
 import com.app.myproject.service.commandservice.MainService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,8 +25,8 @@ public class MainController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<String> test(MultipartFile data) throws IOException {
+    @PostMapping(value = "/test",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> test(@RequestBody MultipartFile data) throws IOException {
         return ResponseEntity.ok(mainFacade.audioToText(data));
     }
 

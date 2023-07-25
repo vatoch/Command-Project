@@ -32,6 +32,7 @@ public class User {
     private List<UserCommand> commands;
 
     @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
+    @JoinColumn(name = "balance_id")
     private Balance balance;
 
     @OneToMany(mappedBy = "receiver",cascade = CascadeType.ALL)

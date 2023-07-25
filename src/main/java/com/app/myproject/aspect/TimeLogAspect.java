@@ -15,10 +15,20 @@ public class TimeLogAspect {
 
     private Logger logger = LoggerFactory.getLogger("Time Logger");
 
-    @Around("@annotation(com.app.myproject.annotations.TimeLog)")
-    public void logTime(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+//    @Around("@annotation(com.app.myproject.annotations.TimeLog)")
+//    public void logTime(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+//        long start = System.currentTimeMillis();
+//        proceedingJoinPoint.proceed();
+//        long end = System.currentTimeMillis();
+//        long result = (end-start)/1000;
+//        logger.info(String.valueOf(result));
+//    }
+
+
+    @Around("execution(* com.app.myproject.controller.*.*(..))")
+    public void log(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
-        proceedingJoinPoint.proceed();
+        joinPoint.proceed();
         long end = System.currentTimeMillis();
         long result = (end-start)/1000;
         logger.info(String.valueOf(result));

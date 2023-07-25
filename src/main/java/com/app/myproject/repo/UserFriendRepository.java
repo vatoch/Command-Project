@@ -34,15 +34,9 @@ public interface UserFriendRepository extends JpaRepository<UserFriend,Long> {
     boolean existsFriends(@Param("username1") String username1,@Param("username2") String username2);
 
 
-//    @Query("""
-//            SELECT u
-//            FROM UserFriend u
-//            where u.sender=:username or u.receiver=:username
-//            """)
-//    @Lock(LockModeType.OPTIMISTIC)
-//    Page<UserFriend> getFriends(@Param("username") String username);
 
-    @Query("select u from User u JOIN FETCH UserFriend uf where uf.receiver.username=:username or uf.sender.username=:username")
+
+    @Query("select u from User u JOIN FETCH UserFriend uf where (uf.receiver.username=:username or uf.sender.username=:username) and uf.status='FRIENDS'")
     Page<User> getFriends2(@Param("username") String username, Pageable pageable);
 
 

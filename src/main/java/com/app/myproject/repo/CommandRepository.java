@@ -8,12 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface CommandRepository extends JpaRepository<Command, UUID> {
-    Optional<Command> findByName(String name);
     @Query("select c from Command c join fetch c.users u where u.user.username=:username")
     Page<Command> getCommandsByUsername(@Param("username") String username, Pageable pageable);
 

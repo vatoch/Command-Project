@@ -39,9 +39,7 @@ class MyprojectApplicationTests {
 	@Test
 	void databaseTests() {
 
-		System.out.println("started transaction");
 
-		service.updateUser(UUID.fromString("3a063843-650d-4606-8456-47b3f9f2e46d"),"chipolino@gmail.com");
 
 	}
 

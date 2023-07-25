@@ -15,7 +15,6 @@ public class CommandController {
     private final TransactionService transactionService;
     private final CommandService commandService;
     @PostMapping("/buy/{id}")
-    @TimeLog
     public ResponseEntity<Void> buyCommand(@RequestHeader(name = "username") String username,@PathVariable String id) {
         transactionService.buyCommand(username,id);
         return ResponseEntity.ok().build();

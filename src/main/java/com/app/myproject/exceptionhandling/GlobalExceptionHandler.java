@@ -2,7 +2,6 @@ package com.app.myproject.exceptionhandling;
 
 
 import com.app.myproject.exceptionhandling.exceptions.*;
-import com.app.myproject.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -36,6 +35,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CommandAlreadyBoughtException.class)
     public ResponseEntity<ExceptionBody> handleCommandAlreadyBoughtException(CommandAlreadyBoughtException commandAlreadyBoughtException,WebRequest webRequest) {
         ExceptionBody body = ExceptionBody.builder().message("Command is already bought").build();
+        return new ResponseEntity<>(body,HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ExceptionBody> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        ExceptionBody body = ExceptionBody.builder().message("User already exists with this username").build();
         return new ResponseEntity<>(body,HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(CommandNotOwnedException.class)

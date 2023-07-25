@@ -10,8 +10,6 @@ import java.util.UUID;
 
 @Service
 public interface UserCommandRepository extends JpaRepository<UserCommand, UUID> {
-    @Query("select u from UserCommand u where u.user.username=:username and u.command.name=:commandname")
-    Optional<UserCommand> findByUsernameAndCommandName(@Param("username") String username, @Param("commandname") String commandname);
 
     @Query("select u from UserCommand u where u.user.username=:username and u.command.id=:commandid")
     Optional<UserCommand> findByUserNameAndId(@Param("username") String username,@Param("commandid") UUID id);
