@@ -82,9 +82,9 @@ public class UserService {
 
     @Transactional
     public void acceptFriendRequest(String sender,String id) {
-        UserFriend userFriend1 = userFriendRepository.findByUsAndId(sender,UUID.fromString(id)).orElseThrow(UnsupportedOperationException::new);
+        UserFriend userFriend1 = userFriendRepository.findByUsAndId(sender,UUID.fromString(id)).orElseThrow(FriendRequestNotFoundException::new);
         if(!userFriend1.getStatus().equals(FriendshipStatus.PENDING)) {
-            throw new UnsupportedOperationException();
+            throw new FriendRequestNotFoundException();
         }
 
         userFriend1.setStatus(FriendshipStatus.FRIENDS);
@@ -120,8 +120,6 @@ public class UserService {
         if(!userRepository.existsByUsername(username)) {
             throw new UserNotFoundException();
         }
-
-
 
 
 

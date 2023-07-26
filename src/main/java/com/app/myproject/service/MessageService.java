@@ -5,7 +5,6 @@ import com.app.myproject.exceptionhandling.exceptions.UserNotFoundException;
 import com.app.myproject.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +12,7 @@ public class MessageService{
 
     private final UserRepository userRepository;
 
-    @Transactional
+
     public void sendMessage(String sender,String receiver,String message) {
 
 
